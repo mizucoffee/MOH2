@@ -14,6 +14,25 @@ get '/' do
   erb :index
 end
 
+# プレイ開始&コマ位置取得
+post '/start' do
+    # 消しゴム作成
+    eraser = Eraser.create(
+        x: params[:x],
+        y: params[:y]
+    )
+    
+    # RESPONSE
+    data = {
+        id: eraser[:id],
+        erasers: Eraser.all
+    }
+
+    data.to_json
+
+    # redirect '/start'
+end
+
 # 角度・強さ送信
 post '/eraser/snap' do
 
@@ -48,29 +67,6 @@ post '/eraser/snap' do
     data.to_json
 end
 
-# プレイ開始&コマ位置取得
-post '/start' do
-    # 消しゴム作成
-    eraser = Eraser.create(
-        x: params[:x],
-        y: params[:y]
-    )
-    
-    # RESPONSE
-    data = {
-        id: eraser[:id],
-        erasers: Eraser.all
-    }
-
-    data.to_json
-
-    # redirect '/start'
-end
-
-# get '/start' do
-#     erb :start
-# end
-
 # 弾き予約
 post '/snap/reserve' do
 
@@ -85,6 +81,26 @@ post '/snap/reserve' do
 
     # RESPONSE
     if(reserve)
+        data = {
+            ok: "ture"
+        }
+    else
+        data = {
+            ok: "false"
+        }
+    end
+
+    data.to_json
+
+end
+
+# コマ削除
+post '/erasar/remove' do
+    
+    # 負けたコマを取得
+    eraser = Eraser.find(params[:id])
+
+    if erasar.delete
         data = {
             ok: "ture"
         }
