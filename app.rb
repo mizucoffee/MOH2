@@ -61,7 +61,7 @@ post '/start' do
         id: eraser[:id],
         erasers: Eraser.all
     }
-    binding.pry
+
     data.to_json
 
     # redirect '/start'
@@ -74,7 +74,6 @@ end
 # 弾き予約
 post '/snap/reserve' do
 
-    binding.pry
     reserve = ReserveNum.create(
         player_id: params[:id].to_i
     )
@@ -106,7 +105,6 @@ post '/eraser/position' do
     # reserve = ReserveNum.where(player_id: params[:id])
     eraser = Eraser.find(params[:id])
 
-    binding.pry
     # 位置の更新
     eraser.update(
         x: params[:x].to_f,
@@ -161,7 +159,6 @@ def reserve_func
     # 弾き予約のはじめのユーザーを取得
     next_turn = ReserveNum.first
 
-    binding.pry
     if(next_turn)
         settings.sockets.each { |s|
             # 弾き予約のはじめのユーザーのidと一致すれば、そのユーザーに通知する
