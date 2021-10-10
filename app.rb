@@ -57,8 +57,8 @@ post '/eraser/snap' do
     to_ws = {
         id: params[:id],
         event: "snap",
-        angle: params[:angle],
-        power: params[:power],
+        x: params[:x],
+        y: params[:y],
     }
     
     settings.sockets.each do |s|
