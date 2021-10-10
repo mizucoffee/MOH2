@@ -21,6 +21,19 @@ post '/start' do
         x: params[:x],
         y: params[:y]
     )
+
+    # 新しい消しゴムが召喚された時
+    content_type :json
+    to_ws = {
+        event: "new",
+        id: erasar.id,
+        x: params[:x],
+        y: params[:y],
+    }
+    
+    settings.sockets.each do |s|
+        s[:ws].send(to_ws.to_json)
+    end
     
     # RESPONSE
     data = {
@@ -39,7 +52,7 @@ post '/eraser/snap' do
     # 生存確認
     my_eraser = Eraser.find(params[:id])
 
-    # 誰かが弾いた時にばら撒かれるデータ
+    # 誰かが弾いた時にばら撒かれるデータ(全体ブロードキャスト)
     content_type :json
     to_ws = {
         id: params[:id],
