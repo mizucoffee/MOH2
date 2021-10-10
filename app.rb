@@ -55,10 +55,10 @@ post '/eraser/snap' do
     # 誰かが弾いた時にばら撒かれるデータ(全体ブロードキャスト)
     content_type :json
     to_ws = {
-        id: params[:id.to_i,
+        id: params[:id].to_i,
         event: "snap",
         x: params[:x].to_f,
-        y: params[:y].to_f,
+        y: params[:y].to_f
     }
     
     settings.sockets.each do |s|
@@ -124,7 +124,7 @@ post '/erasar/remove' do
 
     dl_reserves = ReserveNum.where(player_id: params[:id])
     
-    dl_reserves.each |dl| do
+    dl_reserves.each do |dl|
         dl.delete
     end
 
@@ -202,7 +202,7 @@ get '/websocket/:id' do
 
         # 予約からクローズれさたコマの予約を消す
         reserve = ReserveNum.where(player_id: params[:id])
-        reserve.each |r| do
+        reserve.each do |r|
             r.delete
         end
 
