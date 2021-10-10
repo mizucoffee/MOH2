@@ -5,9 +5,9 @@ gem 'sinatra-websocket'
 
 gem 'rake'
 gem 'sinatra-activerecord'
-gem 'activerecord', '5.2.3'
+gem 'activerecord'
 
-group :development do
-  gem 'sqlite3', '1.4.1'
+#group :development do
+  gem 'sqlite3'
   gem 'pry'
-end
+#end

@@ -9,10 +9,7 @@ require 'json'
 
 set :server, 'thin'
 set :sockets, []
-
-get '/' do
-  erb :index
-end
+set :current_user, nil
 
 # プレイ開始&コマ位置取得
 post '/start' do
@@ -87,8 +84,9 @@ post '/snap/reserve' do
         player_id: params[:id].to_i
     )
 
+    puts "Reserve: #{params[:id]}, #{settings.current_user}"
     # 次のターン通知
-    if(ReserveNum.all.count != 0)
+    if(settings.current_user == nil)
         reserve_func
     end
 
@@ -108,39 +106,46 @@ post '/snap/reserve' do
 end
 
 # コマ削除
-post '/erasar/remove' do
+# post '/erasar/remove' do
     
-    # 負けたコマを取得
-    eraser = Eraser.find(params[:id])
+#     # 負けたコマを取得
+#     eraser = Eraser.find(params[:id])
 
-    # 予約がクローズされたコマである間
-    if ReserveNum.first.id == params[:id] && ReserveNum.first != nil
+#     # 予約がクローズされたコマである間
+#     if ReserveNum.first != nil && ReserveNum.first.player_id == params[:id]
 
-        ReserveNum.first.delete
+#         ReserveNum.first.delete
 
-        reserve_func
+#         reserve_func
 
-    end
+#     end
 
-    dl_reserves = ReserveNum.where(player_id: params[:id])
+#     dl_reserves = ReserveNum.where(player_id: params[:id])
     
-    dl_reserves.each do |dl|
-        dl.delete
-    end
+#     dl_reserves.each do |dl|
+#         dl.delete
+#     end
 
-    if erasar.delete
-        data = {
-            ok: "ture"
-        }
-    else
-        data = {
-            ok: "false"
-        }
-    end
+#     to_ws = {
+#         id: params[:id].to_i
+#     }
+#     settings.sockets.each do |s|
+#         s[:ws].send(to_ws.to_json)
+#     end
 
-    data.to_json
+#     if erasar.delete
+#         data = {
+#             ok: "ture"
+#         }
+#     else
+#         data = {
+#             ok: "false"
+#         }
+#     end
 
-end
+#     data.to_json
+
+# end
 
 # コマ位置通知=ターン終了
 post '/eraser/position' do
@@ -176,11 +181,12 @@ post '/eraser/position' do
 end
 
 get '/websocket/:id' do
+  id = params[:id]
   if request.websocket?
     request.websocket do |ws|
       ws.onopen do
         # settings.sockets << ws
-        settings.sockets << { id: params[:id], ws: ws }
+        settings.sockets << { id: id, ws: ws }
       end
     #   ws.onmessage do |msg|
     #     settings.sockets.each do |s|
@@ -189,21 +195,33 @@ get '/websocket/:id' do
     #   end
       ws.onclose do
         # settings.sockets.delete(ws)
-        settings.sockets.delete({ id: params[:id], ws: ws })
+        settings.sockets.delete({ id: id, ws: ws })
+
+        puts "Connection closed: #{id}"
+        puts "Current user: #{settings.current_user}"
         
         # 予約がクローズされたコマである間
-        if ReserveNum.first.id == params[:id] && ReserveNum.first != nil
-
-            ReserveNum.first.delete
-
+        if settings.current_user == id.to_i
             reserve_func
+        end
 
+        to_ws = {
+            id: id.to_i,
+            event: "remove"
+        }
+        settings.sockets.each do |s|
+            s[:ws].send(to_ws.to_json)
         end
 
         # 予約からクローズれさたコマの予約を消す
-        reserve = ReserveNum.where(player_id: params[:id])
+        reserve = ReserveNum.where(player_id: id)
         reserve.each do |r|
             r.delete
+        end
+
+        eraser = Eraser.find(id)
+        if eraser
+            eraser.delete
         end
 
       end
@@ -224,13 +242,17 @@ def reserve_func
             # 弾き予約のはじめのユーザーのidと一致すれば、そのユーザーに通知する
             if s[:id] == "#{next_turn.player_id}"
                 res = {
-                    event: "turn #{next_turn.player_id}"
+                    event: "turn",
+                    id: "#{next_turn.player_id}"
                 }
                 s[:ws].send(res.to_json)
             end
         }
         # 通知したユーザーの弾き予約をDBから削除する
+        settings.current_user = next_turn.player_id
         next_turn.delete
+    else
+        settings.current_user = nil
     end
 
     # ーーーーーーーーーーーーーーーーー

@@ -1,0 +1,10 @@
+default_env: &default
+  adapter: sqlite3
+  database: db/development.db
+
+
+development:
+  <<: *default
+
+production:
+  <<: *default

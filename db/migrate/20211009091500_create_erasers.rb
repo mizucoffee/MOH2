@@ -1,4 +1,4 @@
-class Eraser < ActiveRecord::Migration[5.2]
+class CreateErasers < ActiveRecord::Migration[6.1]
   def change
     create_table :erasers do |t|
       t.decimal :x
