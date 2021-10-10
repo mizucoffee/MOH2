@@ -26,9 +26,9 @@ post '/start' do
     content_type :json
     to_ws = {
         event: "new",
-        id: eraser.id,
-        x: params[:x],
-        y: params[:y],
+        id: eraser.id.to_i,
+        x: params[:x].to_f,
+        y: params[:y].to_f,
     }
     
     settings.sockets.each do |s|
@@ -55,10 +55,10 @@ post '/eraser/snap' do
     # 誰かが弾いた時にばら撒かれるデータ(全体ブロードキャスト)
     content_type :json
     to_ws = {
-        id: params[:id],
+        id: params[:id.to_i,
         event: "snap",
-        x: params[:x],
-        y: params[:y],
+        x: params[:x].to_f,
+        y: params[:y].to_f,
     }
     
     settings.sockets.each do |s|
@@ -112,6 +112,12 @@ post '/erasar/remove' do
     
     # 負けたコマを取得
     eraser = Eraser.find(params[:id])
+
+    dl_reserves = ReserveNum.where(player_id: params[:id])
+    
+    dl_reserves.each |dl| do
+        dl.delete
+    end
 
     if erasar.delete
         data = {
@@ -175,6 +181,22 @@ get '/websocket/:id' do
       ws.onclose do
         # settings.sockets.delete(ws)
         settings.sockets.delete({ id: params[:id], ws: ws })
+        
+        # 予約がクローズされたコマである間
+        while ReserveNum.first.id == params[:id]
+
+            ReserveNum.first.delete
+
+            reserve_func
+
+        end
+
+        # 予約からクローズれさたコマの予約を消す
+        reserve = ReserveNum.where(player_id: params[:id])
+        reserve.each |r| do
+            r.delete
+        end
+
       end
     end
   end
@@ -203,4 +225,16 @@ def reserve_func
     end
 
     # ーーーーーーーーーーーーーーーーー
+end
+
+options '*' do
+    response.headers["Access-Control-Allow-Methods"] = "GET, PUT, POST, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, Accept, X-User-Email, X-Auth-Token, X-Requested-With"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+end
+  
+before do
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
 end
