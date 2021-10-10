@@ -41,7 +41,7 @@ post '/start' do
         erasers: Eraser.all
     }
 
-    puts data.to_json
+    data.to_json
 
     # redirect '/start'
 end
