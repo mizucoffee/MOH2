@@ -114,7 +114,7 @@ post '/erasar/remove' do
     eraser = Eraser.find(params[:id])
 
     # 予約がクローズされたコマである間
-    while ReserveNum.first.id == params[:id]
+    if ReserveNum.first.id == params[:id] && ReserveNum.first != nil
 
         ReserveNum.first.delete
 
