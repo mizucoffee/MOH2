@@ -88,7 +88,7 @@ post '/snap/reserve' do
     )
 
     # 次のターン通知
-    if(ReserveNum.all.count == 0)
+    if(ReserveNum.all.count != 0)
         reserve_func
     end
 
