@@ -113,6 +113,15 @@ post '/erasar/remove' do
     # 負けたコマを取得
     eraser = Eraser.find(params[:id])
 
+    # 予約がクローズされたコマである間
+    while ReserveNum.first.id == params[:id]
+
+        ReserveNum.first.delete
+
+        reserve_func
+
+    end
+
     dl_reserves = ReserveNum.where(player_id: params[:id])
     
     dl_reserves.each |dl| do
