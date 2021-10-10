@@ -26,7 +26,7 @@ post '/start' do
     content_type :json
     to_ws = {
         event: "new",
-        id: erasar.id,
+        id: eraser.id,
         x: params[:x],
         y: params[:y],
     }
@@ -41,7 +41,7 @@ post '/start' do
         erasers: Eraser.all
     }
 
-    data.to_json
+    puts data.to_json
 
     # redirect '/start'
 end

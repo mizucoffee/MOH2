@@ -27,7 +27,7 @@ $(document).on("click", "#sbm", function() {
     var power = $("#power").val();
 
     $.ajax({
-        url: "/eraser/position",
+        url: "/start",
         type: "POST",
         data: {
             id: id,
