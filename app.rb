@@ -192,7 +192,7 @@ get '/websocket/:id' do
         settings.sockets.delete({ id: params[:id], ws: ws })
         
         # 予約がクローズされたコマである間
-        while ReserveNum.first.id == params[:id]
+        if ReserveNum.first.id == params[:id] && ReserveNum.first != nil
 
             ReserveNum.first.delete
 
